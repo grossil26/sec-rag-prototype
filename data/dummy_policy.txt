@@ -1,0 +1,11 @@
+Policy Title: Internal Data Protection Framework v1.2
+Scope: All European Operations
+
+Section 1: Data Retention
+All employee records must be retained for a period of exactly 5 years after termination of employment. After this period, records must be cryptographically shredded.
+
+Section 2: Breach Notification
+In the event of a suspected data breach involving Personal Identifiable Information (PII), the incident must be reported to the internal cybersecurity desk within 24 hours. The Data Protection Officer (DPO) must notify the national authority within 72 hours.
+
+Section 3: Access Control
+Access to the central employee database requires multi-factor authentication (MFA) and is restricted strictly to Level 3 HR personnel.

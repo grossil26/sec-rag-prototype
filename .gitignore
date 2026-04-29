@@ -1,0 +1,13 @@
+# Security
+.env
+
+# Python Environment
+venv/
+__pycache__/
+*.pyc
+
+# Database
+local_qdrant_db/
+
+# OS Files
+.DS_Store
