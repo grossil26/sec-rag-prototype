@@ -28,21 +28,24 @@ This repository contains a prototype Retrieval-Augmented Generation (RAG) system
 * A free [Groq API Key](https://console.groq.com/keys)
 
 ### 2. Clone the Repository
-	git clone git@git.mif.vu.lt:YOUR_USERNAME/legal-rag-prototype.git
-	cd legal-rag-prototype
+	git clone git@git.mif.vu.lt:YOUR_USERNAME/sec-rag-prototype.git
+	cd sec-rag-prototype
 
 ### 3. Environment Setup
 Create an isolated virtual environment and install the required dependencies:
+
 	python3 -m venv venv
 	source venv/bin/activate
 	pip install -r requirements.txt
 
 ### 4. Environment Variables
 Create a file named `.env` in the root directory and add your API key:
+
 	GROQ_API_KEY="your_groq_api_key_here"
 
 ## Deployment & Usage
 Start the Streamlit web server:
+
 	streamlit run app.py
 
 *(If running on a headless VM, create an SSH tunnel to port 8501 to view the UI locally).*
