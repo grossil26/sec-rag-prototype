@@ -11,7 +11,7 @@ This repository contains a prototype Retrieval-Augmented Generation (RAG) system
     * **Auditor Agent:** An independent LLM-as-a-Judge that evaluates the drafted response. It outputs a programmatic JSON score assessing *Context Relevance* and *Faithfulness* to block hallucinations.
 4. **Role-Based Access Control (RBAC):** A Streamlit web interface featuring separate Admin (ingestion) and User (chat) roles.
 
-##Repository Structure
+## Repository Structure
 * `app.py`: Main Streamlit application and UI logic.
 * `rag_pipeline.py`: Core logic for the Hybrid Retriever and Qdrant integration.
 * `ingest.py`: Handles the Summary-Augmented Chunking (SAC) of new documents.
