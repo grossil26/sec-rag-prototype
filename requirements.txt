@@ -1,3 +1,5 @@
+numpy<2.0.0
+
 streamlit
 python-dotenv
 
@@ -6,10 +8,12 @@ langchain-community
 langchain-core
 langchain-ollama
 langchain-qdrant
+pypdf
 
 qdrant-client
 fastembed
 sentence-transformers
+torchvision
 
 rank_bm25
 
