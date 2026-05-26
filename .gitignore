@@ -1,4 +1,6 @@
 # Security
+venv/
+env/
 .env
 
 # Python Environment
@@ -8,6 +10,9 @@ __pycache__/
 
 # Database
 local_qdrant_db/
+*.graphml
+data/pdfs/
+data/dummy_policy.txt
 
 # OS Files
 .DS_Store
