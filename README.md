@@ -1,61 +1,64 @@
-# Sec_RAG-Prototype
+# SecRAG: A Sovereign, Multi-Agent Graph-RAG Architecture for Multi-Framework Compliance Validation
 
 ## Abstract
-This repository contains a prototype Retrieval-Augmented Generation (RAG) system specifically engineered for legal and cybersecurity frameworks (e.g., GDPR, NIS2). Standard RAG systems often fail on legal documents due to highly repetitive boilerplate language and complex formatting. This architecture resolves these issues by implementing advanced techniques from recent AI research.
+This repository contains the finalized Phase 2 architecture for SecRAG, a Retrieval-Augmented Generation (RAG) system engineered for complex legal and cybersecurity frameworks (e.g., GDPR). To address the limitations of standard RAG—such as Document-Level Retrieval Mismatch (DRM), hallucination risks, and data sovereignty concerns—this system utilizes a 100% local, multi-agent architecture powered by Gemma 4 models, PySpark distributed ingestion, and Knowledge Graph reasoning.
 
-## Architecture & Research Context
-1. **Summary-Augmented Chunking (SAC):** Standard chunking destroys global document context. During ingestion, a Generative LLM creates a concise global summary which is prepended to every single text chunk. This drastically reduces Document-Level Retrieval Mismatch (DRM).
-2. **Hybrid Retrieval:** Relies on an `EnsembleRetriever` combining Dense Semantic Search (Qdrant) to understand query intent, and Sparse Keyword Search (BM25) to capture exact legal acronyms.
-3. **Multi-Agent Evaluation Loop:** 
-    * **Generator Agent:** Drafts an initial response strictly using retrieved context.
-    * **Auditor Agent:** An independent LLM-as-a-Judge that evaluates the drafted response. It outputs a programmatic JSON score assessing *Context Relevance* and *Faithfulness* to block hallucinations.
-4. **Role-Based Access Control (RBAC):** A Streamlit web interface featuring separate Admin (ingestion) and User (chat) roles.
+## Architecture & Innovations
+* **Distributed Ingestion & SAC:** Utilizes Apache PySpark to ingest massive PDF mandates. It employs Summary-Augmented Chunking (SAC), prepending a generative global summary to every chunk to preserve context.
+* **Knowledge Graph (KG) Fusion:** During ingestion, the system extracts explicit logical legal linkages (`Subject -> Predicate -> Object`) using `NetworkX`. These triplets are fused with vector retrieval to enable multi-hop reasoning.
+* **Adaptive Query Routing:** An initial agent classifies query complexity, dynamically adjusting the retrieval parameter ($k=5$ for simple, $k=15$ for complex) to optimize compute load.
+* **Cross-Encoder Hybrid Retrieval:** Fuses Dense Semantic Search (Qdrant) and Sparse Keyword Search (BM25), subsequently passing results through a neural Cross-Encoder (`BAAI/bge-reranker-base`) for rigorous precision filtering.
+* **Generator Agent:** Strictly bound to context answer generator.
+* **Auditor Agent:** An independent LLM-as-a-Judge that evaluates drafts via JSON-enforced logic to block hallucinations.
 
 ## Repository Structure
-* `app.py`: Main Streamlit application and UI logic.
-* `rag_pipeline.py`: Core logic for the Hybrid Retriever and Qdrant integration.
-* `ingest.py`: Handles the Summary-Augmented Chunking (SAC) of new documents.
-* `evaluation_agent.py`: The AI Auditor that verifies context relevance and blocks hallucinations.
-* `retrieve_test.py`: Testing script for the retrieval pipeline.
-* `requirements.txt`: Python dependencies for the project.
-* `data/`: Directory for storing raw policy `.txt` files (Ignored in Git).
+* `app.py`: The core Streamlit application housing the Multi-Agent Evaluation Loop, Router, and Hybrid Retriever.
+* `spark_ingest.py`: The PySpark ETL pipeline for distributed bulk-PDF ingestion, chunking, and Qdrant population.
+* `ragas_eval.py`: Autonomous "LLM-as-a-Judge" semantic benchmarking script (Context Relevance & Faithfulness).
+* `requirements.txt`: Python dependencies.
+* `data/`: Directory for raw PDFs and text policies (Ignored in Git).
 * `local_qdrant_db/`: Local vector database storage (Ignored in Git).
+* `local_kg.graphml`: Exported Knowledge Graph structure (Ignored in Git).
 
 ## Setup & Installation
 
 ### 1. Prerequisites
 * Python 3.10+
-* A free [Groq API Key](https://console.groq.com/keys)
+* Java 8 or 11 (Required for Apache PySpark)
+* Access to a local Ollama cluster (e.g., University supercomputing node) running `gemma4:31b`.
 
-### 2. Clone the Repository
-	git clone git@git.mif.vu.lt:YOUR_USERNAME/sec-rag-prototype.git
-	cd seg-rag-prototype
+### 2. Environment Setup
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-### 3. Environment Setup
-Create an isolated virtual environment and install the required dependencies:
-
-	python3 -m venv venv
-	source venv/bin/activate
-	pip install -r requirements.txt
-
-### 4. Environment Variables
-Create a file named `.env` in the root directory and add your API key:
-
-	GROQ_API_KEY="your_groq_api_key_here"
+### 3. Environment Variables
+Create a `.env` file in the root directory to route inference to your local cluster (No external API keys required):
+```env
+OLLAMA_BASE_URL="http://localhost:xxxxx"
+OLLAMA_MODEL="gemma4:31b"
+```
 
 ## Deployment & Usage
+
+### 1. Bulk Data Ingestion (Backend)
+To process heavy PDF regulatory frameworks into the vector and graph databases:
+```bash
+python spark_ingest.py
+```
+
+### 2. Multi-Agent UI (Frontend)
 Start the Streamlit web server:
+```bash
+streamlit run app.py
+```
+* **Administrator** (`admin` / `admin123`): Access the sidebar to process short `.txt` policies and extract Graph Triplets on the fly.
+* **Standard User** (`user` / `user123`): Submit compliance queries and view the real-time execution of the Router, Reranker, Graph Search, and Auditor verification.
 
-	streamlit run app.py
-
-*(If running on a headless VM, create an SSH tunnel to port 8501 to view the UI locally).*
-
-### User Roles:
-* **Administrator (admin / admin123):** Access the sidebar to upload raw `.txt` policy files. The system will automatically generate SAC summaries, chunk the text, and inject it into the local Qdrant database.
-* **Standard User (user / user123):** Ask legal/compliance questions. The UI will display the real-time execution of the Multi-Agent Evaluation Loop.
-
-## Phase 2 Roadmap
-Future upgrades for deployment on university cluster hardware:
-* Transition to local `Llama3:70b` hosted via Ollama.
-* PySpark integration for distributed PDF ingestion.
-* Knowledge Graph (Neo4j) entity extraction for multi-hop legal reasoning.
+### 3. Autonomous Evaluation (Benchmarking)
+Run the internal RAGAS-Lite evaluator to scientifically grade the system's accuracy and hallucination resistance:
+```bash
+python ragas_eval.py
+```
